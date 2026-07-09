@@ -196,7 +196,7 @@ const App = {
 
         // 2. Update UI metric cards
         this.el.metricMaxStress.textContent = `${metrics.maxStress.toFixed(1)} MPa`;
-        this.el.metricStrain.textContent = metrics.thermalStrain.toFixed(4);
+        this.el.metricStrain.textContent = `${(metrics.thermalStrain * 100).toFixed(3)} %`;
         
         // Calibrate yields warnings
         const yieldStrength = PhysicsEngine.material.yieldStrength; // 250 MPa
