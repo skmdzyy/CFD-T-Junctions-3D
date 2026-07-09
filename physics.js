@@ -60,9 +60,10 @@ const PhysicsEngine = {
         const sigmaHoopFeeder = this.calcHoopStress(pressFeeder, this.dimensions.feederDo, this.dimensions.feederT);
 
         // Stress Concentration Factor (SCF) at T-junction crotch
-        // Typically ranges from 2.0 to 3.5 due to geometric discontinuity
-        const K_t_geom = 2.8;
-        const stressPressureLocal = sigmaHoopMain * K_t_geom;
+        // Integrating both main run stress and branch feeder stress contributions
+        const K_t_main = 2.4;
+        const K_t_feeder = 1.2;
+        const stressPressureLocal = (sigmaHoopMain * K_t_main) + (sigmaHoopFeeder * K_t_feeder);
 
         // 3. Thermal Stress
         // Localized thermal stress: sigma_th = E * alpha * dT / (1 - nu) * K_constraint
