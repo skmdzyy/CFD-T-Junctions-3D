@@ -572,11 +572,9 @@ input[type="range"].slider-cold::-webkit-slider-thumb {
 
 /* Scientific Explanation */
 .scientific-explanation {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow: hidden;
 }
 
 .scientific-explanation h3 {
@@ -587,22 +585,12 @@ input[type="range"].slider-cold::-webkit-slider-thumb {
 }
 
 .explanation-scroll {
-    overflow-y: auto;
-    padding-right: 5px;
     font-size: 0.7rem;
     color: var(--text-secondary);
     line-height: 1.5;
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.explanation-scroll::-webkit-scrollbar {
-    width: 4px;
-}
-.explanation-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.05);
-    border-radius: 2px;
 }
 
 .explanation-scroll strong {
