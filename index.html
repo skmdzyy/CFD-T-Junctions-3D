@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrogen T-Junction: 3D Thermal & Fluid Simulation</title>
+    <!-- Google Fonts: Inter for UI, JetBrains Mono for data -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Three.js & Chart.js CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Fullscreen WebGL Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay Wrapper -->
+    <div class="dashboard-wrapper">
+        
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon"><i class="fa-solid fa-wind text-cyan"></i></div>
+                <div>
+                    <h1>HYDROGEN T-JUNCTION</h1>
+                    <p class="sub-title">CFD & Thermo-Mechanical Stress Simulation Dashboard</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="academic-badge">
+                    <span class="univ">UNIVERSITAS AIRLANGGA</span>
+                    <span class="dept">S1 Fisika - Mekanika Fluida</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace: Panels grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: Controls & Inputs -->
+            <section class="panel glass-panel left-panel animate-slide-in">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-sliders"></i> SIMULATION PARAMETERS</h2>
+                    <span class="status-indicator live">LIVE</span>
+                </div>
+                
+                <div class="panel-body">
+                    <!-- Section: Operating Pressures -->
+                    <div class="control-group">
+                        <h3><i class="fa-solid fa-gauge-high"></i> Operating Pressure</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Main Pipe (Line 14")</span>
+                                <span class="val-display" id="val-press-main">185.9 kg/cm²</span>
+                            </div>
+                            <input type="range" id="slider-press-main" min="100" max="250" step="0.5" value="185.9">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Feeder Pipe (Line 4")</span>
+                                <span class="val-display" id="val-press-feeder">168.0 kg/cm²</span>
+                            </div>
+                            <input type="range" id="slider-press-feeder" min="50" max="200" step="0.5" value="168.0">
+                        </div>
+                    </div>
+
+                    <!-- Section: Operating Temperatures -->
+                    <div class="control-group">
+                        <h3><i class="fa-solid fa-temperature-high"></i> Temperature Profile</h3>
+                        <div class="slider-container">
+                            <div class="slider-label flex-between">
+                                <span>Main Pipe (Hot)</span>
+                                <span class="val-display text-red" id="val-temp-main">390 °C</span>
+                            </div>
+                            <input type="range" id="slider-temp-main" class="slider-hot" min="200" max="500" step="1" value="390">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label flex-between">
+                                <span>Feeder Pipe (Cold)</span>
+                                <span class="val-display text-blue" id="val-temp-feeder">82 °C</span>
+                            </div>
+                            <input type="range" id="slider-temp-feeder" class="slider-cold" min="20" max="150" step="1" value="82">
+                        </div>
+                        <div class="temp-delta-card">
+                            <span>Temperature Differential (ΔT):</span>
+                            <strong id="val-temp-delta">308 °C</strong>
+                        </div>
+                    </div>
+
+                    <!-- Section: Flow Velocities -->
+                    <div class="control-group">
+                        <h3><i class="fa-solid fa-gauge"></i> Fluid Velocity</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Main Flow (Line 14")</span>
+                                <span class="val-display" id="val-vel-main">18.0 m/s</span>
+                            </div>
+                            <input type="range" id="slider-vel-main" min="5" max="30" step="0.1" value="18.0">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Feeder Flow (Line 4")</span>
+                                <span class="val-display" id="val-vel-feeder">4.6 m/s</span>
+                            </div>
+                            <input type="range" id="slider-vel-feeder" min="1" max="15" step="0.1" value="4.6">
+                        </div>
+                    </div>
+
+                    <!-- Section: Visualization Modes -->
+                    <div class="control-group">
+                        <h3><i class="fa-solid fa-eye"></i> Render Settings</h3>
+                        <div class="view-modes">
+                            <button class="btn-mode active" id="btn-mode-combined">
+                                <i class="fa-solid fa-layer-group"></i> Combined View
+                            </button>
+                            <button class="btn-mode" id="btn-mode-flow">
+                                <i class="fa-solid fa-water"></i> Fluid Flow Only
+                            </button>
+                            <button class="btn-mode" id="btn-mode-stress">
+                                <i class="fa-solid fa-fire-flame-simple"></i> Stress Heatmap
+                            </button>
+                        </div>
+                        <div class="toggle-container mt-10">
+                            <label class="switch-label">
+                                <input type="checkbox" id="check-cutaway">
+                                <span class="switch-custom"></span>
+                                <span>Cross-Section Cutaway</span>
+                            </label>
+                        </div>
+                        <div class="toggle-container">
+                            <label class="switch-label">
+                                <input type="checkbox" id="check-particles" checked>
+                                <span class="switch-custom"></span>
+                                <span>Animate Particles</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middle Canvas Area: Legend Overlay -->
+            <section class="canvas-overlays">
+                <!-- Color Legend -->
+                <div class="legend-card glass-panel animate-fade-in">
+                    <div class="legend-header">
+                        <span id="legend-title">Stress Distribution (MPa)</span>
+                    </div>
+                    <div class="legend-bar-container">
+                        <span class="legend-min" id="legend-min-val">0 MPa</span>
+                        <div class="legend-color-bar stress-gradient"></div>
+                        <span class="legend-max" id="legend-max-val">280 MPa</span>
+                    </div>
+                </div>
+
+                <!-- Info Overlay Tooltip (3D click targets trigger this) -->
+                <div class="tooltip-card glass-panel hide" id="3d-tooltip">
+                    <h4 id="tooltip-title">Weld Fillet Crotch</h4>
+                    <p id="tooltip-desc">High thermal stress concentration point due to steep temperature gradients.</p>
+                </div>
+            </section>
+
+            <!-- Right Panel: Analytics & Physics -->
+            <section class="panel glass-panel right-panel animate-slide-in-right">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-chart-line"></i> ANALYTICS & DIAGNOSTICS</h2>
+                </div>
+
+                <div class="panel-body">
+                    <!-- Metric Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card glass-card">
+                            <span class="metric-title">Max Stress (Von Mises)</span>
+                            <div class="metric-val text-orange" id="metric-max-stress">224.5 MPa</div>
+                            <span class="metric-sub" id="metric-stress-status">Caution: Close to yield (250 MPa)</span>
+                        </div>
+                        <div class="metric-card glass-card">
+                            <span class="metric-title">Thermal Strain (ε_th)</span>
+                            <div class="metric-val text-cyan" id="metric-strain">0.0037</div>
+                            <span class="metric-sub">Thermal mismatch impact</span>
+                        </div>
+                        <div class="metric-card glass-card full-width">
+                            <span class="metric-title">Estimated Fatigue Life</span>
+                            <div class="metric-val text-yellow" id="metric-fatigue">8,420 Cycles</div>
+                            <span class="metric-sub text-red-light"><i class="fa-solid fa-triangle-exclamation"></i> High Risk of Thermal Fatigue Crack</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="chart-container">
+                        <h3>Junction Profile (Weld Seam)</h3>
+                        <canvas id="profile-chart"></canvas>
+                    </div>
+
+                    <!-- Scientific Explanation Panel -->
+                    <div class="scientific-explanation glass-card">
+                        <h3><i class="fa-solid fa-circle-info"></i> Physics Explanation</h3>
+                        <div class="explanation-scroll">
+                            <p><strong>Mekanika Fluida & Thermal Shock:</strong></p>
+                            <p>Ketika gas hidrogen dingin (82°C) dari pipa feeder vertikal berdiameter kecil (4") bertemu dengan gas hidrogen panas (390°C) di pipa utama (14"), terjadi percampuran fluida turbulen.</p>
+                            <p>Perbedaan suhu yang ekstrim ($\Delta T = 308^\circ C$) pada dinding logam sambungan las (*weld toe*) menyebabkan kontraksi lokal yang terhambat oleh sisa pipa panas. Hal ini menimbulkan **Tegangan Termal (Thermal Stress)** yang sangat tinggi.</p>
+                            <p><strong>Konsentrasi Tegangan:</strong></p>
+                            <p>Daerah sudut pertemuan pipa (*crotch region*) bertindak sebagai *stress raiser* geometri. Tekanan internal fluida ($185.9 \text{ kg/cm}^2$) yang dikombinasikan dengan regangan termal menciptakan konsentrasi tegangan Von Mises maksimum pada radius fillet sambungan.</p>
+                            <p>Fluktuasi temperatur aliran akibat turbulensi percampuran fluida dapat memicu **Thermal Fatigue** (kelelahan termal) yang mempercepat inisiasi retakan mikro pada weld seam.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script imports -->
+    <script src="physics.js"></script>
+    <script src="simulation.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
