@@ -255,8 +255,9 @@ const Simulation = {
         const mainRadius = 3.1;
         const feederRadius = 1.0;
         
-        // Maximum stress value relative to yield strength (250 MPa)
-        const stressRatio = this.params.maxStress / 250.0;
+        // Maximum stress value relative to dynamic color scale max
+        const scaleMax = this.params.colorScaleMax || 250.0;
+        const stressRatio = this.params.maxStress / scaleMax;
         
         // 1. Color Main Pipe
         const mainPos = this.mainPipe.geometry.attributes.position;
@@ -638,12 +639,13 @@ const Simulation = {
     /**
      * Update operating parameters dynamically
      */
-    updateParameters(inputs, currentMaxStress) {
+    updateParameters(inputs, currentMaxStress, colorScaleMax) {
         this.params.tempMain = inputs.tempMain;
         this.params.tempFeeder = inputs.tempFeeder;
         this.params.velMain = inputs.velMain;
         this.params.velFeeder = inputs.velFeeder;
         this.params.maxStress = currentMaxStress;
+        this.params.colorScaleMax = colorScaleMax || 250.0;
         
         // Re-color pipe walls to reflect new stress levels
         this.updateStressHeatmapColors();

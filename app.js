@@ -149,6 +149,7 @@ const App = {
     },
 
     switchViewMode(mode) {
+        this.currentMode = mode;
         // Update button active state
         [this.el.btnModeCombined, this.el.btnModeFlow, this.el.btnModeStress].forEach(btn => {
             btn.classList.remove('active');
@@ -159,7 +160,7 @@ const App = {
             this.el.legendTitle.textContent = "Stress Distribution (MPa)";
             this.el.legendBar.className = "legend-color-bar stress-gradient";
             this.el.legendMin.textContent = "0 MPa";
-            this.el.legendMax.textContent = "280 MPa";
+            this.updateSimulation(); // force recalculation of dynamic legend max
         } else if (mode === 'flow') {
             this.el.btnModeFlow.classList.add('active');
             this.el.legendTitle.textContent = "Fluid Temperature (°C)";
@@ -171,7 +172,7 @@ const App = {
             this.el.legendTitle.textContent = "Stress Distribution (MPa)";
             this.el.legendBar.className = "legend-color-bar stress-gradient";
             this.el.legendMin.textContent = "0 MPa";
-            this.el.legendMax.textContent = "280 MPa";
+            this.updateSimulation();
         }
         
         // Update simulation
@@ -235,10 +236,15 @@ const App = {
             sub.className = "metric-sub text-red-light";
         }
 
-        // 3. Update Legend text if temperature mode
+        // Dynamic Color Scale Limit calculation (peaks at current max stress, normalized up to next 50 MPa)
+        const colorScaleMax = Math.max(250, Math.ceil(metrics.maxStress / 50) * 50);
+
+        // 3. Update Legend text dynamically
         if (this.currentMode === 'flow') {
             this.el.legendMin.textContent = `${inputs.tempFeeder}°C (Cold)`;
             this.el.legendMax.textContent = `${inputs.tempMain}°C (Hot)`;
+        } else {
+            this.el.legendMax.textContent = `${colorScaleMax} MPa`;
         }
 
         // 4. Update 2D Profile Chart
@@ -251,7 +257,7 @@ const App = {
             tempFeeder: inputs.tempFeeder,
             velMain: inputs.velMain,
             velFeeder: inputs.velFeeder
-        }, metrics.maxStress);
+        }, metrics.maxStress, colorScaleMax);
     },
 
     initChart() {
